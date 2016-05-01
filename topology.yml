@@ -16,17 +16,17 @@ nodes:
       serial_ports: 
         - port_id: "COM1" 
           host_port: "65000"
-          name: "xr-console"
+          name: "boot-console"
 
     - name: rtr2
       box: ubuntu/trusty64
       serial_ports:
         - port_id: "COM1" 
           host_port: "65013"
-          name: "xr-console"
+          name: "boot-console"
         - port_id: "COM2"
           host_port: "65014"
-          name: "xr-aux-console"
+          name: "boot-console2"
 
 
     - name: rtr3
@@ -34,10 +34,10 @@ nodes:
       serial_ports:
         - port_id: "COM1" 
           host_port: "65014"
-          name: "xr-console"
+          name: "boot-console"
         - port_id: "COM2"
           host_port: "65015"
-          name: "xr-aux-console"
+          name: "boot-console2"
 
 edges:
     - name: link1

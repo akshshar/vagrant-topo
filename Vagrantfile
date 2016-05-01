@@ -2,10 +2,6 @@
 
 # vi: set ft=ruby :
 
-rtr_xr_cfg_file_remote = "/home/vagrant/rtr_config" 
-rtr_xr_cfg_dir_host = "configs"
-rtr_xr_scripts_dir_host = "xr_scripts"
-
 # Ensure yaml module is loaded
 require 'yaml'
 require 'pp'
