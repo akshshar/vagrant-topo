@@ -15,4 +15,4 @@ To try it out, right away:
     * `private-shared`: These are private "lan" style networks with a list of nodes that have their interfaces in the same subnet. This defaults to the "host-only" network in vagrant.
 
 
-Currently, only the virtualbox provider is supported.
+Currently, only the **VirtualBox** provider is supported.
