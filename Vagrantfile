@@ -7,6 +7,7 @@ require 'yaml'
 require 'pp'
 require 'timeout'
 require 'socket'
+require 'pry'
 
 require File.dirname(__FILE__) + '/graph.rb'
 include GraphObj
@@ -38,7 +39,7 @@ end
 
 def get_port(seed=65000, exception_list)
    (seed..65535).each do |tcp_port|
-     eval_port = is_port_open?("0.0.0.0", tcp_port)
+     eval_port = is_port_open?("localhost", tcp_port)
      unless eval_port
        unless (exception_list.include? tcp_port)
          return tcp_port
@@ -54,22 +55,24 @@ end
 
 
 nodes = yml_to_obj()
-
 Vagrant.configure(2) do |config|
   port_list = []
   nodes.each do |name, nodeobj|
     config.vm.define name do |node|
       node.vm.box = nodeobj.box
       serial_ports = nodeobj.serial_ports
+#      print serial_ports
+#      print "port_list: #{port_list}"
       serial_count = 1
       seed_host_port = 65000
-      serial_ports.each do |serial_port|
-        if (is_port_open?("0.0.0.0", serial_port["host_port"])) || \
+      Array(serial_ports).each do |serial_port|
+        if (is_port_open?("localhost", serial_port["host_port"])) || \
            (port_list.include? serial_port["host_port"].to_i)
           serial_port["host_port"] = get_port(seed_host_port, port_list)
           seed_host_port = serial_port["host_port"] + 1
         end
         port_list.push(serial_port["host_port"].to_i)
+#        print port_list
         serial_port["uart"] = "--uart#{serial_count}"
         serial_port["uartmode"] = "--uartmode#{serial_count}"
 
@@ -104,7 +107,7 @@ Vagrant.configure(2) do |config|
 
 
       node.vm.provider "virtualbox" do |v|
-        serial_ports.each do |serial_port|
+        Array(serial_ports).each do |serial_port|
           v.customize ["modifyvm", :id, serial_port["uart"], serial_port["io_port"], serial_port["irq"], serial_port["uartmode"], 'tcpserver', serial_port["host_port"]]
         end
       end
@@ -116,7 +119,6 @@ Vagrant.configure(2) do |config|
           link_name = nodeobj.node_link_name["#{intf_cnt}"]
 
           if nodeobj.node_link_type["#{intf_cnt}"] == "private_internal"
-            var_str = ' node.vm.network :"private_network", virtualbox__intnet:"#{link_name}", ip: nodeobj.node_intf_ip["#{intf_cnt}"], auto_config: nodeobj.node_auto_config["#{intf_cnt}"]'
             if nodeobj.node_auto_config["#{intf_cnt}"] == "true"
               node.vm.network :"private_network", virtualbox__intnet:"#{link_name}", ip: nodeobj.node_intf_ip["#{intf_cnt}"]
             else
@@ -126,7 +128,11 @@ Vagrant.configure(2) do |config|
 
           if nodeobj.node_link_type["#{intf_cnt}"] == "private_shared"
             intf_ip = nodeobj.node_intf_ip["#{intf_cnt}"]
-            node.vm.network :"private_network", ip:"#{intf_ip}", auto_config: nodeobj.node_auto_config["#{intf_cnt}"] 
+            if nodeobj.node_auto_config["#{intf_cnt}"] == "true"
+                node.vm.network :"private_network", ip:"#{intf_ip}"
+            else
+                node.vm.network :"private_network", ip:"#{intf_ip}", auto_config: false
+            end
           end 
  
       end

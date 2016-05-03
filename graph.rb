@@ -32,7 +32,11 @@ module GraphObj
             nodes["#{edge[link_node]["name"]}"].node_auto_config["#{edge[link_node]["interface"]}"] = "false"
             nodes["#{edge[link_node]["name"]}"].node_intf_ip["#{edge[link_node]["interface"]}"] = ""
           else
-            nodes["#{edge[link_node]["name"]}"].node_auto_config["#{edge[link_node]["interface"]}"] = "true" 
+            if not edge[link_node].key?("auto_config")
+              nodes["#{edge[link_node]["name"]}"].node_auto_config["#{edge[link_node]["interface"]}"] = "true" 
+            else
+              nodes["#{edge[link_node]["name"]}"].node_auto_config["#{edge[link_node]["interface"]}"] = edge[link_node]["auto_config"]
+            end
             nodes["#{edge[link_node]["name"]}"].node_intf_ip["#{edge[link_node]["interface"]}"] = edge[link_node]["ip"]    
           end
         end 
@@ -42,9 +46,16 @@ module GraphObj
         edge["nodes"].each do |shared_node|
             nodes["#{shared_node["name"]}"].node_link_name["#{shared_node["interface"]}"] = edge["name"]
             nodes["#{shared_node["name"]}"].node_link_type["#{shared_node["interface"]}"] = edge["type"]
-            unless defined?(shared_node["ip"]).nil?
+            if shared_node.key?("ip") 
               nodes["#{shared_node["name"]}"].node_intf_ip["#{shared_node["interface"]}"] = shared_node["ip"]
-              nodes["#{shared_node["name"]}"].node_auto_config["#{shared_node["interface"]}"] = "true" 
+              if not shared_node.key?("auto_config")
+                nodes["#{shared_node["name"]}"].node_auto_config["#{shared_node["interface"]}"] = "true" 
+              else
+                nodes["#{shared_node["name"]}"].node_auto_config["#{shared_node["interface"]}"] = shared_node["auto_config"]
+              end 
+           else
+               nodes["#{shared_node["name"]}"].node_intf_ip["#{shared_node["interface"]}"] = ""
+               nodes["#{shared_node["name"]}"].node_auto_config["#{shared_node["interface"]}"] = "false"
            end
         end
       end
